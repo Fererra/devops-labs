@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/data-source';
+import { NotesModule } from './modules/notes/modules/notes.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import dataSource from './database/data-source';
       autoLoadEntities: true,
       synchronize: false,
     }),
+    NotesModule,
   ],
   controllers: [AppController],
 })
