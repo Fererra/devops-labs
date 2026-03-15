@@ -1,8 +1,24 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { getArg } from './common/util/get-arg.util';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
+
+  if (process.env.LISTEN_FDS && parseInt(process.env.LISTEN_FDS) > 0) {
+    const httpServer = app.getHttpServer();
+
+    httpServer.listen({ fd: 3 }, () => {
+      console.log('Started via systemd socket activation');
+    });
+
+    await app.init();
+  } else {
+    const port = getArg('port');
+
+    await app.listen(port, '127.0.0.1', () => {
+      console.log(`Server is running on port ${port}`);
+    });
+  }
 }
 bootstrap();
