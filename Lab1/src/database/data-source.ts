@@ -10,5 +10,5 @@ export default new DataSource({
   password: getArg('db-password'),
   database: getArg('db-name'),
   entities: [Note],
-  migrations: [__dirname + '/../migrations/*{.ts,.js}'],
+  migrations: [__dirname + '/migrations/*{.ts,.js}'],
 });
