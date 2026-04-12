@@ -27,7 +27,7 @@ WorkingDirectory=$APP_DIR
 
 ExecStartPre=/usr/bin/node $APP_DIR/node_modules/typeorm/cli.js migration:run -d $APP_DIR/dist/database/data-source.js -- --db-host=127.0.0.1 --db-port=3306 --db-user=mywebapp --db-password=password --db-name=mywebapp
 
-ExecStart=/usr/bin/node $APP_DIR/dist/main.js --db-host=127.0.0.1 --db-port=3306 --db-user=mywebapp --db-password=password --db-name=mywebapp
+ExecStart=/usr/bin/node $APP_DIR/dist/main.js --port 5500 --db-host=127.0.0.1 --db-port=3306 --db-user=mywebapp --db-password=password --db-name=mywebapp
 
 Restart=on-failure
 RestartSec=2
