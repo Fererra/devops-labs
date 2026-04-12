@@ -1,10 +1,20 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import dataSource from './database/data-source';
+import { NotesModule } from './modules/notes/modules/notes.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
-  imports: [],
+  imports: [
+    TypeOrmModule.forRoot({
+      ...dataSource.options,
+      autoLoadEntities: true,
+      synchronize: false,
+    }),
+    NotesModule,
+    HealthModule,
+  ],
   controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
