@@ -1,98 +1,150 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Notes App (mywebapp)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Даний репозиторій містить веб-застосунок для нотаток та повну автоматизацію його розгортання у віртуальному середовищі. Назва застосунку та системних юнітів: `mywebapp`.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Варіант індивідуального завдання (N = 24)
 
-## Description
+Розрахунок параметрів згідно з номером у списку групи:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **N (номер у списку):** 24
+- **V2 = (N % 2) + 1 = (24 % 2) + 1 = 1**
+  - Конфігурація: аргументи командного рядка (CLI arguments).
+  - База даних: MariaDB.
+- **V3 = (N % 3) + 1 = (24 % 3) + 1 = 1**
+  - Тип застосунку: Notes (застосунок для нотаток).
+- **V5 = (N % 5) + 1 = (24 % 5) + 1 = 5**
+  - Порт застосунку: 5500.
 
-## Project setup
+---
 
-```bash
-$ npm install
-```
+## Веб-застосунок
 
-## Compile and run the project
+### Призначення
 
-```bash
-# development
-$ npm run start
+**Notes App** – це RESTful сервіс для створення та перегляду текстових нотаток. Застосунок підтримує Content Negotiation, віддаючи дані у форматі JSON або HTML залежно від запиту користувача.
 
-# watch mode
-$ npm run start:dev
+### API-ендпоінти
 
-# production mode
-$ npm run start:prod
-```
+| Метод    | Шлях            | Опис                                                                        | Доступність             |
+| :------- | :-------------- | :-------------------------------------------------------------------------- | :---------------------- |
+| **GET**  | `/`             | Головна сторінка зі списком доступних методів бізнес-логіки.                | Публічний (через Nginx) |
+| **GET**  | `/notes`        | Отримання списку всіх нотаток.                                              | Публічний (через Nginx) |
+| **POST** | `/notes`        | Створення нової нотатки. Тіло запиту: `{"title": "...", "content": "..."}`. | Публічний (через Nginx) |
+| **GET**  | `/health/alive` | Перевірка працездатності сервісу (Liveness).                                | Тільки локально (ВМ)    |
+| **GET**  | `/health/ready` | Перевірка готовності сервісу та підключення до БД (Readiness).              | Тільки локально (ВМ)    |
 
-## Run tests
+### Налаштування середовища та запуск
+
+Для розробки та тестування застосунку локально необхідно:
+
+1. **Node.js:** Версія 20 LTS або новіша.
+2. **MariaDB:** Встановлена та запущена локально.
+
+**Команди для запуску:**
 
 ```bash
-# unit tests
-$ npm run test
+# Встановлення залежностей
+npm install
 
-# e2e tests
-$ npm run test:e2e
+# Запуск міграцій
+node ./node_modules/typeorm/cli.js migration:run -d ./dist/database/data-source.js -- --db-host=127.0.0.1 --db-port=3306 --db-user=user --db-password=pass --db-name=notes
 
-# test coverage
-$ npm run test:cov
+# Запуск застосунку
+node ./dist/main.js --port 5500 --db-host 127.0.0.1 --db-port 3306 --db-user user --db-password pass --db-name notes
 ```
 
-## Deployment
+---
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## Документація по розгортанню
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Базовий образ та вимоги
+
+- **Базовий образ:** Офіційний образ [Fedora 39 Cloud Base](https://app.vagrantup.com/fedora/boxes/39-cloud-base).
+- **CPU:** 2 ядра.
+- **RAM:** 2048 MB.
+- **Disk:** 20 GB (стандарт хмарного образу).
+- **Спеціальні налаштування OS:** Спеціальна розбивка диску не потрібна. Уся конфігурація виконується автоматично через скрипти розгортання.
+
+### Доступ до віртуальної машини
+
+- **Метод входу:** SSH через Vagrant.
+- **Користувач за замовчуванням:** `vagrant`, після відпрацювання блокується згідно з вимогами.
+- **Створені користувачі:** `student`, `teacher`, `operator`.
+  - Пароль за замовчуванням: `12345678`.
+  - При першому вході система вимагатиме змінити пароль.
+
+> **Примітка щодо мережі:** Оскільки віртуалізатор Libvirt (KVM) видає машині динамічну IP-адресу (наприклад, у підмережі `192.168.122.x`), вхід здійснюється через стандартний SSH-клієнт за цією адресою.
+>
+> Команда для входу:
+>
+> ```bash
+> ssh operator@<IP_АДРЕСА_ВМ>
+> ```
+>
+> IP-адресу можна побачити в терміналі під час виконання `vagrant up` у рядку "SSH address: 192.168.122.x".
+
+### Автоматизація розгортання
+
+Розгортання системи повністю автоматизоване за допомогою **Vagrant** та **Shell scripts**.
+
+**Порядок запуску:**
+
+1. Переконайтеся, що встановлені Vagrant та VirtualBox/Libvirt.
+2. Виконайте команду в корені репозиторію:
+   ```bash
+   vagrant up
+   ```
+   Команда автоматично завантажить образ, налаштує мережу, встановить MariaDB, Node.js, Nginx, створить користувачів та запустить системні сервіси.
+
+---
+
+## Інструкція з тестування
+
+Після успішного розгортання (`vagrant up`) виконайте наступні перевірки:
+
+### 1. Перевірка доступності з хоста (через Nginx)
+
+Застосунок проксіюється через Nginx на порт 80 ВМ, який прокинутий на порт 8080 хоста.
+
+- **Перевірка JSON:**
+  ```bash
+  curl -H "Accept: application/json" http://localhost:8080/notes
+  ```
+- **Перевірка HTML:**
+  ```bash
+  curl -H "Accept: text/html" http://localhost:8080/notes
+  ```
+
+### 2. Перевірка внутрішніх ендпоінтів (всередині ВМ)
+
+Зайдіть на ВМ та перевірте стан здоров'я застосунку:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+curl http://127.0.0.1:5500/health/alive
+curl http://127.0.0.1:5500/health/ready
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 3. Перевірка мережевих обмежень БД
 
-## Resources
+Переконайтеся, що MariaDB слухає тільки локальний інтерфейс:
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+ss -tlnp | grep 3306 # Має бути: 127.0.0.1:3306
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### 4. Тестування ролі Оператора
 
-## Support
+Зайдіть під користувачем `operator` та перевірте можливість керування сервісом без пароля:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+sudo systemctl restart mywebapp
+sudo systemctl status mywebapp
+```
 
-## Stay in touch
+### 5. Перевірка логів
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Логи застосунку доступні через `journalctl`:
 
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+sudo journalctl -u mywebapp -f
+```
