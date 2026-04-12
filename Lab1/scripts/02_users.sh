@@ -35,11 +35,11 @@ if ! id "operator" &>/dev/null; then
 fi
 
 cat <<EOF > /etc/sudoers.d/operator
-operator ALL=(ALL) NOPASSWD: \
-    /usr/bin/systemctl start mywebapp.service, \
-    /usr/bin/systemctl stop mywebapp.service, \
-    /usr/bin/systemctl restart mywebapp.service, \
-    /usr/bin/systemctl status mywebapp.service, \
-    /usr/bin/systemctl reload nginx
+operator ALL=(ALL) NOPASSWD: \\
+    /usr/bin/systemctl start mywebapp.service, /usr/bin/systemctl start mywebapp, \\
+    /usr/bin/systemctl stop mywebapp.service, /usr/bin/systemctl stop mywebapp, \\
+    /usr/bin/systemctl restart mywebapp.service, /usr/bin/systemctl restart mywebapp, \\
+    /usr/bin/systemctl status mywebapp.service, /usr/bin/systemctl status mywebapp, \\
+    /usr/bin/systemctl reload nginx.service, /usr/bin/systemctl reload nginx
 EOF
 chmod 440 /etc/sudoers.d/operator
