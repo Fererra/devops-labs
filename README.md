@@ -148,3 +148,15 @@ sudo systemctl status mywebapp
 ```bash
 sudo journalctl -u mywebapp -f
 ```
+
+---
+
+### Запуск проєкту через Docker Compose
+
+Для автоматичного розгортання всіх сервісів виконайте наступну команду в корені проєкту:
+
+```bash
+docker compose up --build -d
+```
+
+Застосунок буде доступний за адресою: `http://localhost:8080`. База даних зберігає свій стан у Docker volume, тому дані не втратяться після перезапуску контейнерів.

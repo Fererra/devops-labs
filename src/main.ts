@@ -16,7 +16,7 @@ async function bootstrap() {
   } else {
     const port = getArg('port');
 
-    await app.listen(port, '127.0.0.1', () => {
+    await app.listen(port, '0.0.0.0', () => {
       console.log(`Server is running on port ${port}`);
     });
   }

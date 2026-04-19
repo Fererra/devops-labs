@@ -1,0 +1,42 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: >
+      sh -c "node ./node_modules/typeorm/cli.js migration:run -d ./dist/database/data-source.js -- --db-host=db --db-port=3306 --db-user=root --db-password=secret --db-name=lab1_db && 
+             node dist/main.js --port=5500 --db-host=db --db-port=3306 --db-user=root --db-password=secret --db-name=lab1_db"
+    depends_on:
+      - db
+    networks:
+      - lab_network
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - '8080:80'
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
+    networks:
+      - lab_network
+
+  db:
+    image: mariadb:10.11
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: secret
+      MARIADB_DATABASE: lab1_db
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - lab_network
+
+networks:
+  lab_network:
+    driver: bridge
+
+volumes:
+  db_data:
