@@ -1,0 +1,23 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "generic/ubuntu2204"
+  config.ssh.insert_key = false
+  
+  config.vm.provider :libvirt do |libvirt|
+    libvirt.memory = 2048
+    libvirt.cpus = 2
+  end
+
+  config.vm.define "runner" do |runner|
+    runner.vm.hostname = "runner-node"
+    
+    runner.vm.provision "shell", path: "setup-runner.sh"
+  end
+
+  config.vm.define "target" do |target|
+    target.vm.hostname = "target-node"
+    
+    target.vm.network "forwarded_port", guest: 80, host: 8080
+    
+    target.vm.provision "shell", path: "setup-target.sh"
+  end
+end
