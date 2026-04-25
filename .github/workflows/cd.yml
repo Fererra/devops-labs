@@ -1,0 +1,29 @@
+name: Continuous Delivery
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  deploy:
+    name: Deploy and Verify
+    runs-on: self-hosted
+
+    steps:
+      - name: Deploy application to Target Node
+        run: |
+          ssh -o StrictHostKeyChecking=no vagrant@192.168.122.92 "sudo systemctl restart nestjs-app.service"
+
+      - name: Verify application status
+        run: |
+          sleep 5
+
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://192.168.122.92/)
+
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "✅ Verification passed: Service is UP (Status 200)!"
+          else
+            echo "❌ Verification failed: HTTP Status $HTTP_STATUS"
+            exit 1
+          fi
