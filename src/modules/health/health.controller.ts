@@ -16,7 +16,7 @@ export class HealthController {
     try {
       await this.dataSource.query('SELECT 1');
       res.status(200).send('OK');
-    } catch (e) {
+    } catch {
       res.status(500).send('DB not ready');
     }
   }

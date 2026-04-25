@@ -87,7 +87,7 @@ export class NotesController {
         <body>
           <h1>${note.title}</h1>
           <p>${note.content}</p>
-          <p>created_at: ${note.createdAt}</p>
+          <p>created_at: ${note.createdAt.toISOString()}</p>
         </body>
         </html>
       `;
