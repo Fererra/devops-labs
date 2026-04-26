@@ -1,14 +1,14 @@
 #!/bin/bash
 set -e
 
-echo "[1/4] Installing dependencies..."
+echo "[1/5] Installing dependencies..."
 apt-get update
 apt-get install -y docker.io nginx mariadb-server
 
 systemctl enable --now docker
 usermod -aG docker vagrant
 
-echo "[2/4] Configuring MariaDB..."
+echo "[2/5] Configuring MariaDB..."
 systemctl enable --now mariadb
 
 mysql -u root << 'EOF'
@@ -18,7 +18,7 @@ GRANT ALL PRIVILEGES ON mywebapp.* TO 'mywebapp'@'localhost';
 FLUSH PRIVILEGES;
 EOF
 
-echo "[3/4] Configuring Nginx..."
+echo "[3/5] Configuring Nginx..."
 rm -f /etc/nginx/sites-enabled/default
 
 cat <<EOF > /etc/nginx/conf.d/mywebapp.conf
@@ -29,7 +29,7 @@ server {
     location /health {
         allow 192.168.121.0/24;
         allow 192.168.122.0/24;
-        deny all;           
+        deny all;
         
         proxy_pass http://127.0.0.1:3000;
         proxy_set_header Host \$host;
@@ -44,8 +44,31 @@ server {
 }
 EOF
 
-echo "[4/4] Restarting services..."
+echo "[4/5] Creating Systemd Unit for NestJS..."
+cat <<EOF > /etc/systemd/system/nestjs-app.service
+[Unit]
+Description=NestJS Application Container
+After=docker.service mariadb.service
+Requires=docker.service
+
+[Service]
+Restart=always
+ExecStartPre=-/usr/bin/docker stop nestjs-app
+ExecStartPre=-/usr/bin/docker rm nestjs-app
+ExecStartPre=/usr/bin/docker pull ghcr.io/fererra/devops-labs:stable
+
+ExecStartPre=/usr/bin/docker run --rm --network host ghcr.io/fererra/devops-labs:stable node node_modules/typeorm/cli.js migration:run -d dist/database/data-source.js -- --db-host=127.0.0.1 --db-port=3306 --db-user=mywebapp --db-password=password --db-name=mywebapp
+ExecStart=/usr/bin/docker run --name nestjs-app --network host ghcr.io/fererra/devops-labs:stable node dist/main.js --port=5500 --db-host=127.0.0.1 --db-port=3306 --db-user=mywebapp --db-password=password --db-name=mywebapp
+ExecStop=/usr/bin/docker stop nestjs-app
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+echo "[5/5] Reloading and restarting services..."
 nginx -t
 systemctl restart nginx
+
+systemctl daemon-reload
 
 echo "Target Node setup complete!"
