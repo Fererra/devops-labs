@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+source /home/vagrant/.env
+
 echo "[1/5] Installing dependencies..."
 apt-get update
 apt-get install -y docker.io nginx mariadb-server
@@ -11,10 +13,10 @@ usermod -aG docker vagrant
 echo "[2/5] Configuring MariaDB..."
 systemctl enable --now mariadb
 
-mysql -u root << 'EOF'
-CREATE DATABASE IF NOT EXISTS mywebapp;
-CREATE USER IF NOT EXISTS 'mywebapp'@'localhost' IDENTIFIED BY 'password';
-GRANT ALL PRIVILEGES ON mywebapp.* TO 'mywebapp'@'localhost';
+mysql -u root << EOF
+CREATE DATABASE IF NOT EXISTS ${DB_NAME};
+CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';
+GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';
 FLUSH PRIVILEGES;
 EOF
 
@@ -57,8 +59,8 @@ ExecStartPre=-/usr/bin/docker stop nestjs-app
 ExecStartPre=-/usr/bin/docker rm nestjs-app
 ExecStartPre=/usr/bin/docker pull ghcr.io/fererra/devops-labs:stable
 
-ExecStartPre=/usr/bin/docker run --rm --network host ghcr.io/fererra/devops-labs:stable node node_modules/typeorm/cli.js migration:run -d dist/database/data-source.js -- --db-host=127.0.0.1 --db-port=3306 --db-user=mywebapp --db-password=password --db-name=mywebapp
-ExecStart=/usr/bin/docker run --name nestjs-app --network host ghcr.io/fererra/devops-labs:stable node dist/main.js --port=5500 --db-host=127.0.0.1 --db-port=3306 --db-user=mywebapp --db-password=password --db-name=mywebapp
+ExecStartPre=/usr/bin/docker run --rm --network host --entrypoint node ghcr.io/fererra/devops-labs:stable node_modules/typeorm/cli.js migration:run -d dist/database/data-source.js -- --db-host=127.0.0.1 --db-port=3306 --db-user=${DB_USER} --db-password=${DB_PASSWORD} --db-name=${DB_NAME}
+ExecStart=/usr/bin/docker run --name nestjs-app --network host --entrypoint node ghcr.io/fererra/devops-labs:stable dist/main.js --port=3000 --db-host=127.0.0.1 --db-port=3306 --db-user=${DB_USER} --db-password=${DB_PASSWORD} --db-name=${DB_NAME}
 ExecStop=/usr/bin/docker stop nestjs-app
 
 [Install]
