@@ -15,7 +15,7 @@ describe('getArg', () => {
       '--db-host=localhost',
     ];
 
-    expect(getArg('port')).toBe('3000');
+    expect(getArg('port')).toBe('5500');
     expect(getArg('db-host')).toBe('localhost');
   });
 
