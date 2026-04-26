@@ -15,8 +15,9 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "target" do |target|
     target.vm.hostname = "target-node"
-    
     target.vm.network "forwarded_port", guest: 80, host: 8080
+    
+    target.vm.provision "file", source: ".env", destination: "/home/vagrant/.env"
     
     target.vm.provision "shell", path: "setup-target.sh"
   end
