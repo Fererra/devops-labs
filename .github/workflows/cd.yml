@@ -5,6 +5,9 @@ on:
     tags:
       - '*'
 
+env:
+  TARGET_IP: ${{ vars.TARGET_IP }}
+
 jobs:
   deploy:
     name: Deploy and Verify
@@ -13,16 +16,15 @@ jobs:
     steps:
       - name: Deploy application to Target Node
         run: |
-          ssh -o StrictHostKeyChecking=no vagrant@192.168.122.92 "sudo systemctl restart nestjs-app.service"
+          ssh -o StrictHostKeyChecking=no vagrant@${TARGET_IP} "sudo systemctl restart nestjs-app.service"
 
       - name: Verify application status
         run: |
           sleep 5
-
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://192.168.122.92/)
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${TARGET_IP}/health/ready)
 
           if [ "$HTTP_STATUS" -eq 200 ]; then
-            echo "✅ Verification passed: Service is UP (Status 200)!"
+            echo "✅ Verification passed: Service and DB are UP!"
           else
             echo "❌ Verification failed: HTTP Status $HTTP_STATUS"
             exit 1
