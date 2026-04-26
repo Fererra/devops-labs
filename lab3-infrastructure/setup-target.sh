@@ -60,7 +60,7 @@ ExecStartPre=-/usr/bin/docker rm nestjs-app
 ExecStartPre=/usr/bin/docker pull ghcr.io/fererra/devops-labs:stable
 
 ExecStartPre=/usr/bin/docker run --rm --network host --entrypoint node ghcr.io/fererra/devops-labs:stable node_modules/typeorm/cli.js migration:run -d dist/database/data-source.js -- --db-host=127.0.0.1 --db-port=3306 --db-user=${DB_USER} --db-password=${DB_PASSWORD} --db-name=${DB_NAME}
-ExecStart=/usr/bin/docker run --name nestjs-app --network host --entrypoint node ghcr.io/fererra/devops-labs:stable dist/main.js --port=3000 --db-host=127.0.0.1 --db-port=3306 --db-user=${DB_USER} --db-password=${DB_PASSWORD} --db-name=${DB_NAME}
+ExecStart=/usr/bin/docker run --name nestjs-app --network host --entrypoint node ghcr.io/fererra/devops-labs:stable dist/main.js --port=5500 --db-host=127.0.0.1 --db-port=3306 --db-user=${DB_USER} --db-password=${DB_PASSWORD} --db-name=${DB_NAME}
 ExecStop=/usr/bin/docker stop nestjs-app
 
 [Install]
