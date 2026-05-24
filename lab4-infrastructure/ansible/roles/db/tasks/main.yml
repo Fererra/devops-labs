@@ -1,0 +1,71 @@
+---
+- name: Install MariaDB server
+  apt:
+    name:
+      - mariadb-server
+      - python3-mysqldb
+    state: present
+    update_cache: yes
+
+- name: Configure MariaDB to listen on all interfaces
+  lineinfile:
+    path: /etc/mysql/mariadb.conf.d/50-server.cnf
+    regexp: '^bind-address'
+    line: 'bind-address = 0.0.0.0'
+  notify: restart mariadb
+
+- name: Reset UFW firewall to a clean state
+  ufw:
+    state: reset
+
+- name: Allow SSH via UFW
+  ufw:
+    rule: allow
+    port: '22'
+    proto: tcp
+
+- name: Allow MariaDB port ONLY from worker node
+  ufw:
+    rule: allow
+    port: '3306'
+    proto: tcp
+    from_ip: "{{ hostvars[groups['workers'][0]]['ansible_host'] }}"
+
+- name: Enable UFW firewall
+  ufw:
+    state: enabled
+    policy: deny
+
+- name: Create application database
+  mysql_db:
+    name: mywebapp
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: Remove insecure wider access user
+  mysql_user:
+    name: mywebapp
+    host: '192.168.100.%'
+    state: absent
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: Remove localhost access user
+  mysql_user:
+    name: mywebapp
+    host: 'localhost'
+    state: absent
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: Create MariaDB user ONLY for worker node IP
+  mysql_user:
+    name: mywebapp
+    password: password
+    priv: 'mywebapp.*:ALL'
+    host: "{{ hostvars[groups['workers'][0]]['ansible_host'] }}"
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: Flush MariaDB privileges
+  mysql_query:
+    query: 'FLUSH PRIVILEGES'
+    login_unix_socket: /var/run/mysqld/mysqld.sock

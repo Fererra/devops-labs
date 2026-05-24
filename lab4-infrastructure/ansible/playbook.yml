@@ -1,0 +1,19 @@
+---
+- name: Apply common configurations to all nodes
+  hosts: all
+  become: true
+  roles:
+    - common
+
+- name: Setup Database Node
+  hosts: db
+  become: true
+  roles:
+    - db
+
+- name: Setup Worker Node (App and Reverse Proxy)
+  hosts: workers
+  become: true
+  roles:
+    - nginx
+    - app

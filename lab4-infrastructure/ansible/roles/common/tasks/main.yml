@@ -1,0 +1,20 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Create user 'teacher'
+  user:
+    name: teacher
+    shell: /bin/bash
+    password: '$6$rounds=656000$.uEbyf87G00H4oI/$B1C333wH4S6A62v1nU6qD47bM9i7ZbeXmcl0VpGis94A9vRj89UfA.D0Z6L38V12K6C1L0VpGis94A9vRj89Uf.'
+    groups: sudo
+    append: yes
+
+- name: Ensure 'teacher' has sudo privileges with password
+  copy:
+    content: 'teacher ALL=(ALL:ALL) ALL'
+    dest: /etc/sudoers.d/teacher
+    mode: '0440'
+    validate: '/usr/sbin/visudo -cf %s'

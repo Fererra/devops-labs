@@ -1,0 +1,18 @@
+[Unit]
+Description=My Web Application
+After=network.target
+
+[Service]
+Type=simple
+User=app
+WorkingDirectory=/var/www/webapp
+
+ExecStartPre=/usr/bin/node /var/www/webapp/node_modules/typeorm/cli.js migration:run -d /var/www/webapp/dist/database/data-source.js -- --db-host={{ hostvars['db-node']['ansible_host'] }} --db-port=3306 --db-user=mywebapp --db-password=password --db-name=mywebapp
+
+ExecStart=/usr/bin/node /var/www/webapp/dist/main.js --port 5500 --db-host={{ hostvars['db-node']['ansible_host'] }} --db-port=3306 --db-user=mywebapp --db-password=password --db-name=mywebapp
+
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
